@@ -1,6 +1,6 @@
 package entities
 
-type User struct {
+type Account struct {
 	Id       int
 	Nama     string
 	Email    string
