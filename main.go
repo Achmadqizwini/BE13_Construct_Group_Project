@@ -2,6 +2,7 @@ package main
 
 import (
 	"be13/account-service-app-project/config"
+	"be13/account-service-app-project/controllers"
 	"be13/account-service-app-project/entities"
 	"fmt"
 	"log"
@@ -62,6 +63,7 @@ func main() {
 			var userrow entities.User
 			errScan := idAccount.Scan(&userrow.Id)
 			if errScan == nil {
+				var id_account = userrow.Id
 				fmt.Println()
 				fmt.Println("login berhasil")
 				fmt.Println()
@@ -159,7 +161,96 @@ func main() {
 				// }
 
 				case 2:
-				// transaksi
+
+					fmt.Println("Menu : \n1. Top Up \n2. Transfer \n3. Lihat history top up \n4. Lihat history transfer")
+					fmt.Println("Pilih transaksi :")
+					var pilihan int
+					fmt.Scanln(&pilihan)
+
+					switch pilihan {
+					case 1:
+						{
+							top_up := entities.User{}
+							fmt.Println("Masukkan nomor telepon :")
+							fmt.Scanln(&top_up.No_telepon)
+							fmt.Println("Masukkan nominal top up :")
+							var nominal int
+							fmt.Scanln(&nominal)
+
+							rowsAffected, err := controllers.Topup(db, id_account)
+							if err != nil {
+								fmt.Println("error top up")
+							} else {
+								if rowsAffected == 0 {
+									fmt.Println("Top up gagal")
+								} else {
+									fmt.Println("Top up berhasil")
+									fmt.Println()
+									fmt.Println("Cek saldo anda :")
+									fmt.Println("1. Ya \n2. Tidak ")
+									var cek int
+									fmt.Scanln(&cek)
+
+									switch cek {
+									case 1:
+										Saldo, err := controllers.TambahSaldo(db, nominal, id_account)
+										if err != nil {
+											fmt.Println("error cek saldo")
+										} else {
+											fmt.Println(Saldo)
+										}
+									}
+
+								}
+							}
+						}
+					case 2:
+						{
+							transfer := entities.User{}
+							fmt.Println("Masukkan nomor telepon tujuan :")
+							fmt.Scanln(&transfer.No_telepon)
+							fmt.Println("Masukkan nominal transfer :")
+							var nominal int
+							fmt.Scanln(&nominal)
+							detail := entities.Transfer{}
+							fmt.Println("Tambahkan keterangan (opsional) :")
+							fmt.Scanln(&detail.Keterangan)
+
+							var query = "Insert into Transfer (User_id, User_id_tujuan, nominal, keterangan, created_at) Values (?, ?, ?,?,?)"
+							statement, errPrepare := db.Prepare(query)
+							if errPrepare != nil {
+								log.Fatal("error prepare top up", errPrepare.Error())
+							}
+							idTujuan := db.QueryRow("select id from users where no_telepon in(?)", transfer.No_telepon)
+
+							var userrow entities.User
+							errScan := idAccount.Scan(&userrow.Id)
+							if errScan != nil {
+								log.Fatal("error scan no telpon ", errScan.Error())
+							}
+
+							if userrow.Saldo > nominal {
+								result, errExec := statement.Exec(idAccount, idTujuan, nominal, detail.Keterangan)
+								if errExec != nil {
+									log.Fatal("error exec transfer", errExec.Error())
+								} else {
+									row, _ := result.RowsAffected()
+									if row > 0 {
+										fmt.Println("Transfer berhasil")
+
+									} else {
+										fmt.Println("Transfer gagal")
+									}
+								}
+							} else {
+								fmt.Println("miskin?")
+							}
+
+						}
+					case 3:
+					case 4:
+
+					}
 				case 3:
 					// {
 					// 	idData := entities.User{}
