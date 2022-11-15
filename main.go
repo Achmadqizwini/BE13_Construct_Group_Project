@@ -85,7 +85,7 @@ func main() {
 		}
 
 	case 3:
-
+		var namapengirim string
 	}
 
 }
