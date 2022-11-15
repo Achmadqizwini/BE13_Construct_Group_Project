@@ -20,6 +20,33 @@ func main() {
 
 	switch pilihan {
 	case 1:
+		{
+			newUser := entities.User{}
+			fmt.Println("Masukkan id user:")
+			fmt.Scanln(&newUser.Id)
+			fmt.Println("Masukkan nama user:")
+			fmt.Scanln(&newUser.Nama)
+			fmt.Println("Masukkan email user:")
+			fmt.Scanln(&newUser.Email)
+			fmt.Println("Masukkan password user:")
+			fmt.Scanln(&newUser.Password)
+			fmt.Println("Masukkan phone user:")
+			fmt.Scanln(&newUser.Phone)
+			fmt.Println("Masukkan domisili user:")
+			fmt.Scanln(&newUser.Domisili)
+
+			rowsAffected, err := controllers.InsertDataToUser(db, newUser)
+			if err != nil {
+				fmt.Println("error insert data")
+			} else {
+				if rowsAffected == 0 {
+					fmt.Println("gagal insert data")
+				} else {
+					fmt.Println("insert data berhasil")
+				}
+			}
+
+		}
 
 	case 2:
 		account := entities.User{}
