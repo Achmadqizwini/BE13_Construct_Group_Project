@@ -11,7 +11,7 @@ func main() {
 	db := config.ConnectToDB()
 	defer db.Close()
 
-	fmt.Println("Menu : \n1. Register \n2. Top Up \n3. Transfer\n ")
+	fmt.Println("Menu : \n1. Register \n2. Top Up \n3. Close\n ")
 	fmt.Println("Masukan pilihan anda :")
 	var pilihan int
 	fmt.Scanln(&pilihan)
