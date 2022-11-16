@@ -1,26 +1,27 @@
 package controllers
 
 import (
-	"fmt"
-	"log"
+	"be13/account-service-app-project/entities"
+	"database/sql"
 )
 
-func AccountRegister() {
-	var query = "Insert into user(Nama, Gender, No_telepon, Password) Values (?, ?, ?, ?)"
+func AccountRegister(db *sql.DB, newUser entities.User) (int, error) {
+
+	var query = "Insert into users(Nama, Gender, No_telepon, Password) Values (?, ?, ?, ?)"
 	statement, errPrepare := db.Prepare(query)
 	if errPrepare != nil {
-		log.Fatal("error prepare Register ", errPrepare.Error())
+		return -1, errPrepare
 	}
 
 	result, errExec := statement.Exec(newUser.Nama, newUser.Gender, newUser.No_telepon, newUser.Password)
 	if errExec != nil {
-		log.Fatal("error exec Register", errExec.Error())
+		return -1, errExec
 	} else {
-		row, _ := result.RowsAffected()
+		row, errrow := result.RowsAffected()
 		if row > 0 {
-			fmt.Println("Register berhasil")
+			return int(row), nil
 		} else {
-			fmt.Println("Register gagal")
+			return -1, errrow
 		}
 	}
 }
