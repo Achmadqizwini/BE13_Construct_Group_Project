@@ -25,3 +25,14 @@ func AccountRegister(db *sql.DB, newUser entities.User) (int, error) {
 		}
 	}
 }
+
+func LihatProfile(db *sql.DB, userrow entities.User) (*entities.User, error) {
+	result := db.QueryRow("select nama, gender, no_telepon, saldo from user where id in(?) ", userrow.Id)
+
+	var idData entities.User
+	errScan := result.Scan(&idData.Nama, &idData.Gender, &idData.No_telepon, &idData.Saldo)
+	if errScan != nil {
+		return nil, errScan
+	}
+	return &idData, nil
+}

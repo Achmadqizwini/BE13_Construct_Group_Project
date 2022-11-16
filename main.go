@@ -71,6 +71,7 @@ func main() {
 			var userrow entities.User
 			errScan := idAccount.Scan(&userrow.Id)
 			if errScan == nil {
+				var id_account = userrow.Id
 				fmt.Println()
 				fmt.Println("login berhasil")
 				fmt.Println()
@@ -89,14 +90,12 @@ func main() {
 						switch pilihan {
 						case 1:
 							{
-								result := db.QueryRow("select nama, gender, no_telepon, saldo from user where id in(?)", idAccount)
-
-								var userrow entities.User // membuat variabel penampung
-								errScan := result.Scan(&userrow.Nama, &userrow.Gender, &userrow.No_telepon, &userrow.Saldo)
-								if errScan != nil {
-									log.Fatal("error scan", errScan.Error())
+								userrow, err := controllers.LihatProfile(db, account)
+								if err != nil {
+									fmt.Println("Tidak bisa menampilkan profile")
+								} else {
+									fmt.Printf("nama : %s\n, gender : %s\n, no_telepon : %s\n, saldo : %d\n", userrow.Nama, userrow.Gender, userrow.No_telepon, userrow.Saldo)
 								}
-								fmt.Printf("nama : %s\n, gender : %s\n, no_telepon : %%\n, saldo : %d\n", userrow.Nama, userrow.Gender, userrow.No_telepon, userrow.Saldo)
 							}
 
 						case 2:
@@ -110,13 +109,12 @@ func main() {
 								fmt.Println("Update Password : ")
 								fmt.Scanln(&updateUser.Password)
 
-								var query = ("Update user set nama = ?, no_telepon = ?, password = ?")
+								var query = ("Update users set nama = ?, no_telepon = ?, password = ? where id = ?")
 								statement, errPrepare := db.Prepare(query)
 								if errPrepare != nil {
 									log.Fatal("error prepare insert ", errPrepare.Error())
 								}
-
-								result, errExec := statement.Exec(updateUser.Nama, updateUser.No_telepon, updateUser.Password)
+								result, errExec := statement.Exec(updateUser.Nama, updateUser.No_telepon, updateUser.Password, id_account)
 								if errExec != nil {
 									log.Fatal("error execution insert ", errExec.Error())
 								} else {
@@ -135,25 +133,33 @@ func main() {
 								fmt.Println("1. Ya 2. Tidak")
 								var pilihanhapus int
 								fmt.Scanln(&pilihanhapus)
-								// deleteData := entities.User{} tambahkan if
+								switch pilihanhapus {
+								case 1:
+									{
+										var query = ("Delete from users where id = ?")
+										statement, errPrepare := db.Prepare(query)
+										if errPrepare != nil {
+											log.Fatal("error prepare insert ", errPrepare.Error())
+										}
 
-								var query = ("Delete from user where id = ?")
-								statement, errPrepare := db.Prepare(query)
-								if errPrepare != nil {
-									log.Fatal("error prepare insert ", errPrepare.Error())
-								}
+										result, errExec := statement.Exec(id_account)
+										if errExec != nil {
+											log.Fatal("error exec insert", errExec.Error())
+										} else {
+											row, _ := result.RowsAffected()
+											if row > 0 {
+												fmt.Println("delete berhasil")
+											} else {
+												fmt.Println("delete gagal")
+											}
+										}
+									}
+								case 2:
+									{
 
-								result, errExec := statement.Exec(userrow.Id)
-								if errExec != nil {
-									log.Fatal("error exec insert", errExec.Error())
-								} else {
-									row, _ := result.RowsAffected()
-									if row > 0 {
-										fmt.Println("delete berhasil")
-									} else {
-										fmt.Println("delete gagal")
 									}
 								}
+
 							}
 						}
 					}
@@ -168,14 +174,14 @@ func main() {
 						caripengguna := entities.User{}
 						fmt.Println("Masukkan No Telepon yang dicari :")
 						fmt.Scanln(&caripengguna.No_telepon)
-						result := db.QueryRow("select nama, gender, no_telepon, from user where no_telepon in(?)", caripengguna.No_telepon)
+						result := db.QueryRow("select nama, gender, no_telepon from users where no_telepon = ?", caripengguna.No_telepon)
 
-						var userrow entities.User // membuat variabel penampung
+						var userrow entities.User
 						errScan := result.Scan(&userrow.Nama, &userrow.Gender, &userrow.No_telepon)
 						if errScan != nil {
 							log.Fatal("error scan", errScan.Error())
 						} else {
-							fmt.Printf("nama : %s\n gender : %s\n no telepon : %d", userrow.Nama, userrow.Gender, userrow.No_telepon)
+							fmt.Printf("nama : %s\n gender : %s\n no telepon : %s", userrow.Nama, userrow.Gender, userrow.No_telepon)
 						}
 					}
 
