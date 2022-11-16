@@ -2,6 +2,7 @@ package main
 
 import (
 	"be13/account-service-app-project/config"
+	"be13/account-service-app-project/controllers"
 	"be13/account-service-app-project/entities"
 	"fmt"
 	"log"
@@ -22,10 +23,21 @@ func main() {
 	case 1:
 		{
 			newUser := entities.User{}
+			var jeniskel int
 			fmt.Println("Masukkan nama user:")
 			fmt.Scanln(&newUser.Nama)
-			fmt.Println("Masukkan Jenis Kelamin:")
-			fmt.Scanln(&newUser.Gender)
+			fmt.Println("Pilih Nomor Jenis Kelamin: \n1. Male \n2. Female")
+			fmt.Scanln(&jeniskel)
+			switch jeniskel {
+			case 1:
+				{
+					newUser.Gender = "male"
+				}
+			case 2:
+				{
+					newUser.Gender = "female"
+				}
+			}
 			fmt.Println("Masukkan Nomor Telephone:")
 			fmt.Scanln(&newUser.No_telepon)
 			fmt.Println("Masukkan Password:")
@@ -34,6 +46,7 @@ func main() {
 			rowsAffected, err := controllers.AccountRegister(db, newUser)
 			if err != nil {
 				fmt.Println("error insert data")
+				// fmt.Println(err)
 			} else {
 				if rowsAffected == 0 {
 					fmt.Println("gagal insert data")
