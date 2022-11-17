@@ -102,3 +102,25 @@ func KurangSaldo(db *sql.DB, nominal int, saldo int, ent entities.User) (int, er
 		return newsaldo, nil
 	}
 }
+
+func Created(db *sql.DB, id_account int, nominal int) ([]entities.Top_up, error) {
+	result, err := db.Query("select users.nama, top_up.nominal, top_up.created_at from top_up inner join users on top_up.user_id = users.id where users.id in(?) ", id_account)
+	if err != nil {
+		return nil, err
+	}
+
+	nama := db.QueryRow("select nama from users where id in(?)", id_account)
+
+	var dataUser []entities.Top_up
+	for result.Next() { // membaca tiap baris/row dari hasil query
+		var userrow entities.Top_up                                // perbaris           // membuat variabel penampung
+		errScan := result.Scan(nama, nominal, &userrow.Created_at) // melakukan scanning data dari masing" row dan menyimpannya kedalam variabel yang dibuat sebelumnya
+		if errScan != nil {                                        // handling ketika ada error pada saat proses scannign
+			return nil, errScan
+		}
+		// fmt.Printf("id %s, nama %s, email %s\n", userrow.Id, userrow.Nama, userrow.Email)
+		dataUser = append(dataUser, userrow)
+	}
+	return dataUser, nil
+
+}
