@@ -45,18 +45,6 @@ func TambahSaldo(db *sql.DB, nominal int, saldo int, id_account int) (int, error
 	}
 }
 
-func SelectNom(db *sql.DB, ent entities.User) (int, error) {
-	idNom := db.QueryRow("select nominal from top_up where no_telepon = (?)", ent.No_telepon)
-	var userrow entities.Top_up
-	errScan := idNom.Scan(&userrow.Nominal)
-	if errScan != nil {
-		return -1, errScan
-	} else {
-		var id_Nom = userrow.Nominal
-		return id_Nom, nil
-	}
-}
-
 func KurangSaldo(db *sql.DB, nominal int, saldo int, id_account int) (int, error) {
 	var query = ("Update users set saldo = ? where id = ?")
 	statement, errPrepare := db.Prepare(query)
