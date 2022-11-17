@@ -4,6 +4,7 @@ import (
 	"be13/account-service-app-project/entities"
 	"database/sql"
 	"log"
+	"time"
 )
 
 // func Transfer(db *sql.DB, transfer entities.User, id_account int, saldo_user int) (int, error) {
@@ -39,7 +40,8 @@ import (
 // }
 
 func Transfer(db *sql.DB, entity entities.User, entity2 entities.Transfer, id_account int, nominal *int) (int, error) {
-	var query = "Insert into Transfer (User_id_Pengirim, User_id_Penerima, nominal, keterangan) Values (?, ?, ?,?)"
+	entity2.Created_at = time.Now()
+	var query = "Insert into Transfer (User_id_Pengirim, User_id_Penerima, nominal, keterangan, created_at) Values (?, ?, ?,?,?)"
 	statement, errPrepare := db.Prepare(query)
 	if errPrepare != nil {
 		log.Fatal("error prepare top up", errPrepare.Error())
@@ -52,7 +54,7 @@ func Transfer(db *sql.DB, entity entities.User, entity2 entities.Transfer, id_ac
 		log.Fatal("error scan no telpon ", errScan.Error())
 	}
 
-	result, errExec := statement.Exec(id_account, userrow.Id, nominal, entity2.Keterangan)
+	result, errExec := statement.Exec(id_account, userrow.Id, nominal, entity2.Keterangan, entity2.Created_at)
 	if errExec != nil {
 		return -1, errExec
 	} else {
