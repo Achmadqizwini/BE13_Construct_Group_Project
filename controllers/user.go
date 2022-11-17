@@ -62,8 +62,8 @@ func AccountRegister(db *sql.DB, newUser entities.User) (int, error) {
 	}
 }
 
-func LihatProfile(db *sql.DB, userrow entities.User) (*entities.User, error) {
-	result := db.QueryRow("select nama, gender, no_telepon, saldo from user where id in(?) ", userrow.Id)
+func LihatProfile(db *sql.DB, id_account int) (*entities.User, error) {
+	result := db.QueryRow("select nama, gender, no_telepon, saldo from users where id in (?) ", id_account)
 
 	var idData entities.User
 	errScan := result.Scan(&idData.Nama, &idData.Gender, &idData.No_telepon, &idData.Saldo)
@@ -71,4 +71,57 @@ func LihatProfile(db *sql.DB, userrow entities.User) (*entities.User, error) {
 		return nil, errScan
 	}
 	return &idData, nil
+}
+
+func UpdateProfile(db *sql.DB, updateUser entities.User, id_account int) (int, error) {
+	var query = ("Update users set nama = ?, no_telepon = ?,password = ? where id = ?")
+	statement, errPrepare := db.Prepare(query)
+	if errPrepare != nil {
+		return -1, errPrepare
+	}
+	result, errExec := statement.Exec(updateUser.Nama, updateUser.No_telepon, updateUser.Password, id_account)
+	if errExec != nil {
+		return 0, errExec
+	} else {
+		row, error := result.RowsAffected()
+		if row > 0 {
+			return int(row), nil
+		} else {
+			return 0, error
+		}
+	}
+}
+
+func CariPengguna(db *sql.DB, carinomor entities.User) (entities.User, error) {
+	result := db.QueryRow("select nama, gender, no_telepon from users where no_telepon = ?", carinomor.No_telepon)
+
+	var penggunalain entities.User
+	errScan := result.Scan(&penggunalain.Nama, &penggunalain.Gender, &penggunalain.No_telepon)
+	if errScan != nil {
+		return penggunalain, errScan
+	} else {
+		return penggunalain, nil
+	}
+
+}
+
+func HapusProfile(db *sql.DB, id_account int) (int, error) {
+	query := ("Delete from users where id in (?)")
+	statement, errPrepare := db.Prepare(query)
+	if errPrepare != nil {
+		return -1, errPrepare
+	}
+
+	result, errExec := statement.Exec(id_account)
+	if errExec != nil {
+		return -1, errExec
+		// log.Fatal("error exec insert", errExec.Error())
+	} else {
+		row, error := result.RowsAffected()
+		if error != nil {
+			return -1, error
+		} else {
+			return int(row), nil
+		}
+	}
 }

@@ -86,9 +86,9 @@ func main() {
 						switch pilihan {
 						case 1:
 							{
-								userrow, err := controllers.LihatProfile(db, account)
+								userrow, err := controllers.LihatProfile(db, id_account)
 								if err != nil {
-									fmt.Println("Tidak bisa menampilkan profile")
+									fmt.Println("Tidak bisa menampilkan profile", err.Error())
 								} else {
 									fmt.Printf("nama : %s\n, gender : %s\n, no_telepon : %s\n, saldo : %d\n", userrow.Nama, userrow.Gender, userrow.No_telepon, userrow.Saldo)
 								}
@@ -105,20 +105,14 @@ func main() {
 								fmt.Println("Update Password : ")
 								fmt.Scanln(&updateUser.Password)
 
-								var query = ("Update users set nama = ?, no_telepon = ?, password = ? where id = ?")
-								statement, errPrepare := db.Prepare(query)
-								if errPrepare != nil {
-									log.Fatal("error prepare insert ", errPrepare.Error())
-								}
-								result, errExec := statement.Exec(updateUser.Nama, updateUser.No_telepon, updateUser.Password, id_account)
-								if errExec != nil {
-									log.Fatal("error execution insert ", errExec.Error())
+								rows, error := controllers.UpdateProfile(db, updateUser, id_account)
+								if error != nil {
+									fmt.Println("Eksekusi Gagal")
 								} else {
-									row, _ := result.RowsAffected()
-									if row > 0 {
-										fmt.Println("update berhasil")
+									if rows > 0 {
+										fmt.Println("Update Berhasil")
 									} else {
-										fmt.Println("update gagal")
+										fmt.Println("Update Gagal")
 									}
 								}
 							}
@@ -128,31 +122,26 @@ func main() {
 								fmt.Println("Apa anda yakin akan menghapus profil?")
 								fmt.Println("1. Ya 2. Tidak")
 								var pilihanhapus int
+
 								fmt.Scanln(&pilihanhapus)
 								switch pilihanhapus {
 								case 1:
 									{
-										var query = ("Delete from users where id = ?")
-										statement, errPrepare := db.Prepare(query)
-										if errPrepare != nil {
-											log.Fatal("error prepare insert ", errPrepare.Error())
-										}
-
-										result, errExec := statement.Exec(id_account)
-										if errExec != nil {
-											log.Fatal("error exec insert", errExec.Error())
+										row, error := controllers.HapusProfile(db, id_account)
+										if error != nil {
+											fmt.Println("Eksekusi Gagal", error.Error())
 										} else {
-											row, _ := result.RowsAffected()
 											if row > 0 {
-												fmt.Println("delete berhasil")
+												fmt.Println("Hapus Berhasil")
 											} else {
-												fmt.Println("delete gagal")
+												fmt.Println("Hapus Gagal")
 											}
 										}
 									}
+
 								case 2:
 									{
-
+										fmt.Println("Tidak Jadi Hapus")
 									}
 								}
 
@@ -355,14 +344,12 @@ func main() {
 						caripengguna := entities.User{}
 						fmt.Println("Masukkan No Telepon yang dicari :")
 						fmt.Scanln(&caripengguna.No_telepon)
-						result := db.QueryRow("select nama, gender, no_telepon from users where no_telepon = ?", caripengguna.No_telepon)
 
-						var userrow entities.User
-						errScan := result.Scan(&userrow.Nama, &userrow.Gender, &userrow.No_telepon)
-						if errScan != nil {
-							log.Fatal("error scan", errScan.Error())
+						caripengguna2, err := controllers.CariPengguna(db, caripengguna)
+						if err != nil {
+							fmt.Println("Profil Tidak Ditemukan")
 						} else {
-							fmt.Printf("nama : %s\n gender : %s\n no telepon : %s", userrow.Nama, userrow.Gender, userrow.No_telepon)
+							fmt.Printf("nama : %s\ngender : %s\nno_telepon : %s\n", caripengguna2.Nama, caripengguna2.Gender, caripengguna2.No_telepon)
 						}
 					}
 
