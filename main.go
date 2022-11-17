@@ -86,7 +86,7 @@ func main() {
 							{
 								userrow, err := controllers.LihatProfile(db, id_account)
 								if err != nil {
-									fmt.Println("Tidak bisa menampilkan profile")
+									fmt.Println("Tidak bisa menampilkan profile", err.Error())
 								} else {
 									fmt.Printf("Nama : %s\nJenis Kelamin : %s\nNo telepon : %s\nSaldo : %d\n", userrow.Nama, userrow.Gender, userrow.No_telepon, userrow.Saldo)
 								}
