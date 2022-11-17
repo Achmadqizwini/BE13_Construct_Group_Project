@@ -10,3 +10,11 @@ type Transfer struct {
 	Keterangan       string
 	Created_at       time.Time
 }
+
+type History_Transfer_Respon struct {
+	Nama_Pengirim string
+	Nama_Penerima string
+	Nominal       int
+	Keterangan    string
+	Created_at    time.Time
+}
