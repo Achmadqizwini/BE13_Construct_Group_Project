@@ -23,6 +23,39 @@ func main() {
 	switch pilihan {
 	case 1:
 
+		newUser := entities.User{}
+		var jeniskel int
+		fmt.Println("Masukkan nama user:")
+		fmt.Scanln(&newUser.Nama)
+		fmt.Println("Pilih Nomor Jenis Kelamin: \n1. Male \n2. Female")
+		fmt.Scanln(&jeniskel)
+		switch jeniskel {
+		case 1:
+			{
+				newUser.Gender = "male"
+			}
+		case 2:
+			{
+				newUser.Gender = "female"
+			}
+		}
+		fmt.Println("Masukkan Nomor Telephone:")
+		fmt.Scanln(&newUser.No_telepon)
+		fmt.Println("Masukkan Password:")
+		fmt.Scanln(&newUser.Password)
+
+		rowsAffected, err := controllers.AccountRegister(db, newUser)
+		if err != nil {
+			fmt.Println("error insert data")
+			// fmt.Println(err)
+		} else {
+			if rowsAffected == 0 {
+				fmt.Println("gagal insert data")
+			} else {
+				fmt.Println("insert data berhasil")
+			}
+		}
+
 	case 2:
 		{
 			account := entities.User{}
@@ -45,7 +78,87 @@ func main() {
 
 				switch pilihan {
 				case 1:
-					fmt.Println("Profile :")
+					{
+						fmt.Println("Menu Profile : \n1. Lihat Profile \n2. Update Profile \n3. Hapus Profile")
+						fmt.Println("Masukkan Pilihan Anda")
+						var pilihan int
+						fmt.Scanln(&pilihan)
+						switch pilihan {
+						case 1:
+							{
+								userrow, err := controllers.LihatProfile(db, account)
+								if err != nil {
+									fmt.Println("Tidak bisa menampilkan profile")
+								} else {
+									fmt.Printf("nama : %s\n, gender : %s\n, no_telepon : %s\n, saldo : %d\n", userrow.Nama, userrow.Gender, userrow.No_telepon, userrow.Saldo)
+								}
+							}
+
+						case 2:
+							{
+								fmt.Println("Update Profile")
+								updateUser := entities.User{}
+								fmt.Println("Update nama : ")
+								fmt.Scanln(&updateUser.Nama)
+								fmt.Println("Update Nomor Telepon : ")
+								fmt.Scanln(&updateUser.No_telepon)
+								fmt.Println("Update Password : ")
+								fmt.Scanln(&updateUser.Password)
+
+								var query = ("Update users set nama = ?, no_telepon = ?, password = ? where id = ?")
+								statement, errPrepare := db.Prepare(query)
+								if errPrepare != nil {
+									log.Fatal("error prepare insert ", errPrepare.Error())
+								}
+								result, errExec := statement.Exec(updateUser.Nama, updateUser.No_telepon, updateUser.Password, id_account)
+								if errExec != nil {
+									log.Fatal("error execution insert ", errExec.Error())
+								} else {
+									row, _ := result.RowsAffected()
+									if row > 0 {
+										fmt.Println("update berhasil")
+									} else {
+										fmt.Println("update gagal")
+									}
+								}
+							}
+
+						case 3:
+							{
+								fmt.Println("Apa anda yakin akan menghapus profil?")
+								fmt.Println("1. Ya 2. Tidak")
+								var pilihanhapus int
+								fmt.Scanln(&pilihanhapus)
+								switch pilihanhapus {
+								case 1:
+									{
+										var query = ("Delete from users where id = ?")
+										statement, errPrepare := db.Prepare(query)
+										if errPrepare != nil {
+											log.Fatal("error prepare insert ", errPrepare.Error())
+										}
+
+										result, errExec := statement.Exec(id_account)
+										if errExec != nil {
+											log.Fatal("error exec insert", errExec.Error())
+										} else {
+											row, _ := result.RowsAffected()
+											if row > 0 {
+												fmt.Println("delete berhasil")
+											} else {
+												fmt.Println("delete gagal")
+											}
+										}
+									}
+								case 2:
+									{
+
+									}
+								}
+
+							}
+						}
+					}
 
 				case 2:
 
@@ -65,13 +178,6 @@ func main() {
 							var nominal int
 							fmt.Scanln(&nominal)
 							nominal2 := &nominal
-
-							// tf := entities.Transfer{}
-							// fmt.Println("masukkan keterangan")
-							// var
-							// fmt.Println("masukkan nominal")
-							// var nom int
-							// fmt.Scanln(&nom)
 
 							rowsAffected, err := controllers.Topup(db, id_account, nominal)
 							if err != nil {
@@ -245,18 +351,20 @@ func main() {
 
 					}
 				case 3:
-					// {
-					// 	idData := entities.User{}
-					// 	fmt.Println("Masukkan id yang ingin dicari : ")
-					// 	fmt.Scanln(&idData.Id)
+					{
+						caripengguna := entities.User{}
+						fmt.Println("Masukkan No Telepon yang dicari :")
+						fmt.Scanln(&caripengguna.No_telepon)
+						result := db.QueryRow("select nama, gender, no_telepon from users where no_telepon = ?", caripengguna.No_telepon)
 
-					// 	userrow, errGetId := controllers.GetUserById(db, idData)
-					// 	if errGetId != nil {
-					// 		fmt.Println("error get data user")
-					// 	} else {
-					// 		fmt.Printf("id :%s \n nama :%s \n email :%s \n phone :%s \n domisili :%s \n ", userrow.Id, userrow.Nama, userrow.Email, userrow.Phone, userrow.Domisili)
-					// 	}
-					// }
+						var userrow entities.User
+						errScan := result.Scan(&userrow.Nama, &userrow.Gender, &userrow.No_telepon)
+						if errScan != nil {
+							log.Fatal("error scan", errScan.Error())
+						} else {
+							fmt.Printf("nama : %s\n gender : %s\n no telepon : %s", userrow.Nama, userrow.Gender, userrow.No_telepon)
+						}
+					}
 
 				}
 			} else {
