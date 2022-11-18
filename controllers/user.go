@@ -114,7 +114,7 @@ func HapusProfile(db *sql.DB, id_account int) (int, error) {
 	result, errExec := statement.Exec(id_account)
 	if errExec != nil {
 		return -1, errExec
-		// log.Fatal("error exec insert", errExec.Error())
+
 	} else {
 		row, error := result.RowsAffected()
 		if error != nil {
