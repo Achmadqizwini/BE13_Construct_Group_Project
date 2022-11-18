@@ -65,7 +65,6 @@ func LihatProfile(db *sql.DB, id_account int) (*entities.User, error) {
 
 	result := db.QueryRow("select nama, gender, no_telepon, saldo from users where id in(?) ", id_account)
 
-
 	var idData entities.User
 	errScan := result.Scan(&idData.Nama, &idData.Gender, &idData.No_telepon, &idData.Saldo)
 	if errScan != nil {
