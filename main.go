@@ -234,7 +234,7 @@ func main() {
 									fmt.Println("Tidak dapat melakukan transfer")
 								} else {
 									fmt.Println("Transfer Sukses")
-									// transfer.Created_at = time.Now()
+
 									saldoPenerima, err := controllers.Get_saldo_2(db, tujuan)
 									if err != nil {
 										fmt.Println("error cek saldo", err.Error())
