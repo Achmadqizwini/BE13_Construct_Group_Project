@@ -217,7 +217,6 @@ func main() {
 							fmt.Scanln(&nominal)
 							fmt.Println("Masukkan keterangan :")
 							fmt.Scanln(&transfer.Keterangan)
-							// var nom = &transfer.Nominal
 
 							saldoUser, err := controllers.Get_saldo(db, id_account)
 							if err != nil {
